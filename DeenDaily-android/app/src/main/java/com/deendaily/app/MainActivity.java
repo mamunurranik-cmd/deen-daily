@@ -318,23 +318,7 @@ public class MainActivity extends Activity {
     }
 
     private void showNotif(String title, String body, String tag) {
-        if (!"granted".equals(notifState())) return;
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= 26) {
-            nm.createNotificationChannel(new NotificationChannel(CHANNEL, "রিমাইন্ডার", NotificationManager.IMPORTANCE_DEFAULT));
-        }
-        Intent i = new Intent(this, MainActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification.Builder b;
-        if (Build.VERSION.SDK_INT >= 26) b = new Notification.Builder(this, CHANNEL);
-        else b = new Notification.Builder(this);
-        b.setSmallIcon(R.drawable.ic_stat)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setContentIntent(pi)
-                .setAutoCancel(true);
-        nm.notify(Math.abs(tag.hashCode()), b.build());
+        Notifier.show(this, title, body, tag);
     }
 
     /* ---------- JS bridge: window.DeenDaily ---------- */
@@ -446,6 +430,11 @@ public class MainActivity extends Activity {
                     }
                 }
             });
+        }
+
+        @JavascriptInterface
+        public void scheduleNotifications(String json) {
+            AlarmHelper.schedule(MainActivity.this, json);
         }
 
         @JavascriptInterface
