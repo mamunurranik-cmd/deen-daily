@@ -18,6 +18,7 @@ import android.webkit.WebViewClient;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -44,8 +45,26 @@ public class MainActivity extends Activity {
                 FileOutputStream fos = new FileOutputStream(new File(dir, name));
                 fos.write(Base64.decode(b64, Base64.DEFAULT));
                 fos.close();
-                toast("PDF saved: " + name);
+                toast("PDF সেভ হয়েছে: " + name);
             } catch (Exception e) { toast("PDF save failed"); }
+        }
+        @android.webkit.JavascriptInterface
+        public void sharePdf(String b64, String fn) {
+            try {
+                File dir = new File(getExternalFilesDir(null), "reports");
+                if (!dir.exists()) dir.mkdirs();
+                String name = (fn == null || fn.length() == 0) ? "deen-daily-report.pdf" : fn;
+                File f = new File(dir, name);
+                FileOutputStream fos = new FileOutputStream(f);
+                fos.write(Base64.decode(b64, Base64.DEFAULT));
+                fos.close();
+                Uri uri = FileProvider.getUriForFile(MainActivity.this, "com.deendaily.app.fileprovider", f);
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("application/pdf");
+                i.putExtra(Intent.EXTRA_STREAM, uri);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(i, "Share PDF"));
+            } catch (Exception e) { toast("Share failed"); }
         }
         @android.webkit.JavascriptInterface
         public void shareText(String text) {
