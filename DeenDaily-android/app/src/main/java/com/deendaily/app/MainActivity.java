@@ -42,4 +42,13 @@ public class MainActivity extends Activity {
 
         web.loadUrl("file:///android_asset/index.html");
     }
+
+    @Override
+    public void onBackPressed() {
+        if (web != null && web.canGoBack()) {
+            web.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
